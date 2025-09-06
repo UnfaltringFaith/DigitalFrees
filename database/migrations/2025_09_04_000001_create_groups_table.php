@@ -10,13 +10,17 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('posts', function (Blueprint $table) {
+        Schema::create('groups', function (Blueprint $table) {
             $table->id();
-            $table->longText('body')->nullable();
+            $table->string('name');
+            $table->string('slug');
+            $table->string('cover_path')->nullable();
+            $table->string('thumbnail_path')->nullable();
+            $table->boolean('auto_approval')->default(true);
+            $table->text('about')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('group_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamp('deleted_at')->nullable();
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +30,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('posts');
+        Schema::dropIfExists('groups');
     }
 };
