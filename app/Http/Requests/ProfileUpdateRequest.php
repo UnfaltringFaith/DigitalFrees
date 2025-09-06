@@ -6,6 +6,9 @@ use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * @method \App\Models\User user()
+ */
 class ProfileUpdateRequest extends FormRequest
 {
     /**
@@ -25,6 +28,14 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'username' => ['required', 'string', 'regex:/[0-9a-z\-\.]+$/'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'username.regex' => 'The username must not contain spaces.',
         ];
     }
 }
