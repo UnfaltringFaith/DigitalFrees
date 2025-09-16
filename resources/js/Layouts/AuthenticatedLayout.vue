@@ -60,7 +60,7 @@ const showingNavigationDropdown = ref(false);
                                 </Dropdown>
                             </div>
 
-                            <div>
+                            <div v-else>
                                 <Link :href="route('login')">
                                 Login
                                 </Link>

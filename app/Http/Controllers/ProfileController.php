@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Js;
 use Illuminate\Http\Request;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Redirect;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProfileController extends Controller
 {
@@ -22,7 +25,7 @@ class ProfileController extends Controller
         return Inertia::render('Profile/View', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
-            'user' => $user,
+            'user' => new UserResource($user),
         ]);
     }
 
@@ -72,5 +75,23 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    public function updateLayout(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'cover_image' => ['nullable', 'image', 'max:2048'], // Max size 2MB
+            'avatar_image' => ['nullable', 'image', 'max:2048'], // Max size 2MB
+        ]);
+
+        $user = $request->user();
+
+        if ($request->hasFile('cover_image')) {
+            $path = $request->file('cover_image')->store("user-{$user->id}", 'public');
+            $user->cover_path = $path;
+            $user->save();
+        }
+
+        return back()->with('status', 'layout-updated-successfully');
     }
 }
