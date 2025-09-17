@@ -53,7 +53,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit');
+        return to_route('profile', $request->user()->username)->with('status', 'profile-updated');
     }
 
     /**
@@ -86,9 +86,25 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        if ($user->cover_path && $request->hasFile('cover_image')) {
+            // Удаляем старое изображение, если оно существует
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->cover_path);
+        }
+
+        if ($user->avatar_path && $request->hasFile('avatar_image')) {
+            // Удаляем старое изображение, если оно существует
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar_path);
+        }
+
         if ($request->hasFile('cover_image')) {
-            $path = $request->file('cover_image')->store("user-{$user->id}", 'public');
+            $path = $request->file('cover_image')->store("cover_image/user-{$user->id}", 'public');
             $user->cover_path = $path;
+            $user->save();
+        }
+
+        if ($request->hasFile('avatar_image')) {
+            $path = $request->file('avatar_image')->store("avatar_image/user-{$user->id}", 'public');
+            $user->avatar_path = $path;
             $user->save();
         }
 
